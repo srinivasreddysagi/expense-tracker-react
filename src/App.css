@@ -213,13 +213,12 @@ ul {
     top: 0.6rem;
     left: -1rem;
     border: 0;
-    transform: translate(100%);
+    transform: translate(-100%);
     opacity: 0;
     transition: 0.3s ease;
-    z-index: -1;
 }
 
-.trx:hover .trx-del {
+.trx:hover .trx-del, .trx-del:hover {
     transform: translate(-40%);
     opacity: 1;
 }

@@ -1,16 +1,33 @@
-import { useReducer } from "react";
+import { useReducer, useState } from "react";
 import "./app.css";
 import Transaction from "./components/Transaction";
+import { v4 as uuidv4 } from "uuid";
 
 function App() {
-    function changeState() {}
+    const [note, setNote] = useState("");
+    const [amount, setAmount] = useState("");
+
+    function changeState(state, action) {
+        switch (action.type) {
+            case "SUBMIT": {
+                const trx = {
+                    id: uuidv4(),
+                    trx: action.add === "income" ? true : false,
+                    note,
+                    amount,
+                };
+                return { ...state, transactions: [...state.transactions, trx] };
+            }
+            default:
+                throw new Error();
+        }
+    }
 
     const [state, setState] = useReducer(changeState, {
         balance: 0,
         income: 0,
         expense: 0,
-        note: "",
-        amount: 0,
+        transactions: [],
     });
 
     return (
@@ -41,14 +58,15 @@ function App() {
                         </div>
                     </div>
                 </div>
-                <form className="addtrx">
+                <div className="addtrx">
                     <h3>Add transaction</h3>
                     <div className="input-container">
                         <input
                             type="text"
                             placeholder="Note"
                             className="input-element"
-                            value={state.value}
+                            value={note}
+                            onChange={(e) => setNote(e.target.value)}
                         />
                     </div>
                     <div className="input-container">
@@ -56,24 +74,45 @@ function App() {
                             type="text"
                             placeholder="Amount"
                             className="input-element"
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)}
                             required
                         />
                     </div>
                     <div className="input-container">
-                        <button type="submit" className="input-element submit">
+                        <button
+                            className="input-element submit"
+                            onClick={(e) => {
+                                setState({
+                                    type: "SUBMIT",
+                                    payload: e,
+                                    add: "income",
+                                });
+                            }}
+                        >
                             Add Income
                         </button>
-                        <button type="submit" className="input-element submit">
+                        <button
+                            className="input-element submit"
+                            onClick={(e) =>
+                                setState({
+                                    type: "SUBMIT",
+                                    payload: e,
+                                    add: "expense",
+                                })
+                            }
+                        >
                             Add Expense
                         </button>
                     </div>
-                </form>
+                </div>
                 <div className="trx-container">
                     <h3>History</h3>
                     <div className="trxs">
                         <ul>
-                            <Transaction trx={true} />
-                            <Transaction trx={false} />
+                            {state.transactions.map((item) => (
+                                <Transaction key={item.id} {...item} />
+                            ))}
                         </ul>
                     </div>
                 </div>
