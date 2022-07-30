@@ -16,7 +16,27 @@ function App() {
                     note,
                     amount,
                 };
-                return { ...state, transactions: [...state.transactions, trx] };
+
+                let income = state.income;
+                let expense = state.expense;
+                const Amount = parseInt(amount);
+
+                const balance = trx.trx
+                    ? state.balance + Amount
+                    : state.balance - Amount;
+
+                if (trx.trx) income += Amount;
+                else expense += Amount;
+
+                setNote("");
+                setAmount("");
+
+                return {
+                    balance,
+                    income,
+                    expense,
+                    transactions: [...state.transactions, trx],
+                };
             }
             default:
                 throw new Error();
@@ -39,7 +59,11 @@ function App() {
                         <div className="balance">
                             <h3>Balance</h3>
                             <p>
-                                ₹<span>{state.balance}</span>
+                                <span>
+                                    {state.balance >= 0
+                                        ? "₹" + state.balance
+                                        : "-₹" + Math.abs(state.balance)}
+                                </span>
                             </p>
                         </div>
                         <div className="earn-spend">
