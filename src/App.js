@@ -1,5 +1,4 @@
 import { useReducer, useState } from "react";
-import "./app.css";
 import Transaction from "./components/Transaction";
 import { v4 as uuidv4 } from "uuid";
 
