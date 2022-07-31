@@ -10,32 +10,58 @@ function App() {
     function changeState(state, action) {
         switch (action.type) {
             case "SUBMIT": {
-                const trx = {
-                    id: uuidv4(),
-                    trx: action.add === "income" ? true : false,
-                    note,
-                    amount,
-                };
+                if (note.trim() !== "" && /^\d+$/.test(amount)) {
+                    const trx = {
+                        id: uuidv4(),
+                        trx: action.payload === "income" ? true : false,
+                        note,
+                        amount,
+                    };
 
+                    let income = state.income;
+                    let expense = state.expense;
+                    const Amount = parseInt(amount);
+
+                    if (trx.trx) income += Amount;
+                    else expense += Amount;
+
+                    const balance = income - expense;
+
+                    setNote("");
+                    setAmount("");
+
+                    return {
+                        balance,
+                        income,
+                        expense,
+                        transactions: [...state.transactions, trx],
+                    };
+                }
+                return state;
+            }
+            case "DELETE": {
+                const trx = state.transactions.find((item) => {
+                    return item.id === action.payload;
+                });
+
+                const Amount = parseInt(trx.amount);
                 let income = state.income;
                 let expense = state.expense;
-                const Amount = parseInt(amount);
 
-                const balance = trx.trx
-                    ? state.balance + Amount
-                    : state.balance - Amount;
+                if (trx.trx) income -= Amount;
+                else expense -= Amount;
 
-                if (trx.trx) income += Amount;
-                else expense += Amount;
+                console.log(income, expense);
 
-                setNote("");
-                setAmount("");
+                const balance = income - expense;
 
                 return {
                     balance,
                     income,
                     expense,
-                    transactions: [...state.transactions, trx],
+                    transactions: state.transactions.filter(
+                        (item) => item.id !== action.payload
+                    ),
                 };
             }
             default:
@@ -106,11 +132,10 @@ function App() {
                     <div className="input-container">
                         <button
                             className="input-element submit"
-                            onClick={(e) => {
+                            onClick={() => {
                                 setState({
                                     type: "SUBMIT",
-                                    payload: e,
-                                    add: "income",
+                                    payload: "income",
                                 });
                             }}
                         >
@@ -118,11 +143,10 @@ function App() {
                         </button>
                         <button
                             className="input-element submit"
-                            onClick={(e) =>
+                            onClick={() =>
                                 setState({
                                     type: "SUBMIT",
-                                    payload: e,
-                                    add: "expense",
+                                    payload: "expense",
                                 })
                             }
                         >
@@ -131,11 +155,15 @@ function App() {
                     </div>
                 </div>
                 <div className="trx-container">
-                    <h3>History</h3>
+                    <h3>Statement</h3>
                     <div className="trxs">
                         <ul>
                             {state.transactions.map((item) => (
-                                <Transaction key={item.id} {...item} />
+                                <Transaction
+                                    key={item.id}
+                                    fun={setState}
+                                    {...item}
+                                />
                             ))}
                         </ul>
                     </div>
